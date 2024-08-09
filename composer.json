@@ -1,0 +1,32 @@
+{
+    "name": "wpai/elellm",
+    "description": "A PHP framework that makes working with LLMs more pleasurable and accessible.",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "WpAi\\EleLLM\\": "src/",
+            "Tests\\": "tests/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Greg Hunt",
+            "email": "greg@codewp.ai"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require-dev": {
+        "pestphp/pest": "^2.35",
+        "laravel/pint": "^1.17"
+    },
+    "config": {
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
+    },
+    "require": {
+        "jenssegers/blade": "^2.0",
+        "illuminate/view": "11.7.0"
+    }
+}
