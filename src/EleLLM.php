@@ -4,6 +4,8 @@ namespace WpAi\EleLLM;
 
 class EleLLM
 {
+    public Prompt $prompt;
+
     public function __construct(
         private ?string $promptFileDir = null,
         private ?string $promptCacheDir = null,
@@ -15,10 +17,7 @@ class EleLLM
         if (is_null($this->promptCacheDir)) {
             $this->promptCacheDir = __DIR__.'/cache';
         }
-    }
 
-    public function prompt(): Prompt
-    {
-        return new Prompt($this->promptFileDir, $this->promptCacheDir);
+        $this->prompt = new Prompt($this->promptFileDir, $this->promptCacheDir);
     }
 }

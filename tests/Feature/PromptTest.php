@@ -13,6 +13,8 @@ test('the prompts work', function () {
     biz baz
 
     EOT;
-    $compiled = $this->llm->prompt()->file('test', ['var' => 'bar']);
+    $compiled = $this->llm->prompt
+        ->share(['shared' => 'baz'])
+        ->file('test', ['var' => 'bar']);
     expect($compiled)->toBe($result);
 });

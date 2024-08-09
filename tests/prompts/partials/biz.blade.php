@@ -1,1 +1,1 @@
-biz baz
+biz {{ $shared }}
