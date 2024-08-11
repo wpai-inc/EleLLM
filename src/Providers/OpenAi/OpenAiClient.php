@@ -57,8 +57,18 @@ class OpenAiClient implements ClientInterface
     public function stream(ChatRequest $request): Generator
     {
         $stream = $this->client->chat()->createStreamed($request->toArray());
+        // $usage = null;
+        // $content .= data_get($response, 'choices.0.delta.content');
+        // $usage = data_get($response, 'usage');
+
         foreach ($stream as $response) {
-            yield $response;
+            yield new ChatResponse(
+                choices: $response->choices,
+                id: $response->id,
+                object: $response->object,
+                timestamp: $response->created,
+                model: $response->model,
+            );
         }
     }
 }

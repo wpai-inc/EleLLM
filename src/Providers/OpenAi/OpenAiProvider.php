@@ -45,12 +45,8 @@ class OpenAiProvider implements ProviderInterface
     {
         $stream = $this->client->stream($this->getChatRequest($messages, $options));
 
-        $content = '';
-        $usage = null;
         foreach ($stream as $response) {
-            $content .= data_get($response, 'choices.0.delta.content');
-            $usage = data_get($response, 'usage');
-            yield $content;
+            yield (string) $response;
         }
     }
 
