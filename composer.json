@@ -34,6 +34,7 @@
         "openai-php/client": "^0.10.1",
         "symfony/http-client": "^7.1",
         "nyholm/psr7": "^1.8",
-        "guzzlehttp/guzzle": "^7.9"
+        "guzzlehttp/guzzle": "^7.9",
+        "wpai-inc/anthropic-sdk-php": "^0.2.1"
     }
 }

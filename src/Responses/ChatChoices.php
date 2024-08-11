@@ -15,14 +15,7 @@ class ChatChoices
     {
         $self = new self;
         foreach ($choices as $choice) {
-            $self->addChoice(new ChatChoice(
-                $choice->index,
-                new ChatMessage(
-                    $choice->message->role,
-                    $choice->message->content
-                ),
-                $choice?->finishReason,
-            ));
+            $self->addChoice($choice);
         }
 
         return $self;

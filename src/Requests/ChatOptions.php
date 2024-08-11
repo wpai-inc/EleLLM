@@ -10,6 +10,7 @@ class ChatOptions
 
     public function __construct(
         public readonly string $model,
+        public readonly ?string $system = null,
     ) {
         $this->adapter = $this->baseAdapter();
     }
@@ -28,9 +29,10 @@ class ChatOptions
 
     public function toArray(): array
     {
-        return [
+        return array_filter([
             'model' => $this->model,
-        ];
+            'system' => $this->system,
+        ], fn ($v) => $v !== null);
     }
 
     public function get(): array

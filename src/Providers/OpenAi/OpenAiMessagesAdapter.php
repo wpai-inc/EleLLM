@@ -7,6 +7,11 @@ use WpAi\EleLLM\Message;
 
 class OpenAiMessagesAdapter implements IMessagesAdapter
 {
+    public function transform(array $messages): array
+    {
+        return $messages;
+    }
+
     public function clientMessage(Message $msg): array
     {
         $content = [

@@ -22,6 +22,10 @@ class Config
                 'organization' => $_ENV['OPENAI_ORGANIZATION'],
                 'request_timeout' => $_ENV['OPENAI_REQUEST_TIMEOUT'] ?? 30,
             ],
+            Provider::ANTHROPIC => [
+                'api_key' => $_ENV['ANTHROPIC_API_KEY'],
+                'api_version' => $_ENV['ANTHROPIC_API_VERSION'] ?? null,
+            ],
         };
     }
 }

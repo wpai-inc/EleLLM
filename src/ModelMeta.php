@@ -5,9 +5,11 @@ namespace WpAi\EleLLM;
 class ModelMeta
 {
     public function __construct(
-        public int $context_window,
-        public float $input_cost,
-        public float $output_cost,
+        public readonly int $context_window,
+        public readonly float $input_cost,
+        public readonly float $output_cost,
+        public readonly ?string $name = null,
+        public readonly ?int $max_output = null,
     ) {}
 
     public function toArray(): array

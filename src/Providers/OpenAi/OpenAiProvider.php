@@ -47,7 +47,7 @@ class OpenAiProvider implements ProviderInterface
 
         $content = '';
         $usage = null;
-        foreach ($stream->getIterator() as $response) {
+        foreach ($stream as $response) {
             $content .= data_get($response, 'choices.0.delta.content');
             $usage = data_get($response, 'usage');
             yield $content;

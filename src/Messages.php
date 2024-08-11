@@ -89,8 +89,9 @@ class Messages implements Countable, IteratorAggregate, JsonSerializable
         $messages = array_slice($this->filterRoles(Role::USER, Role::ASSISTANT), -$limit);
 
         $prefilteredMessages = [$system, ...$messages];
+        $filteredMessages = $this->adapter->transform($prefilteredMessages);
 
-        return array_map(fn (Message $msg) => $this->adapter->clientMessage($msg), $prefilteredMessages);
+        return array_map(fn (Message $msg) => $this->adapter->clientMessage($msg), $filteredMessages);
     }
 
     public function jsonSerialize(): array

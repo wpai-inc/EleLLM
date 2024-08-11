@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "dc101a9396c528bec04d4c31a78f4622",
+    "content-hash": "5b3b95f07b928bb8f9dd88728a87616d",
     "packages": [
         {
             "name": "carbonphp/carbon-doctrine-types",
@@ -2960,6 +2960,58 @@
                 }
             ],
             "time": "2022-03-08T17:03:00+00:00"
+        },
+        {
+            "name": "wpai-inc/anthropic-sdk-php",
+            "version": "0.2.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/wpai-inc/anthropic-sdk-php.git",
+                "reference": "64bd99228b878cd247c4da0909c2e50c6fd84097"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/wpai-inc/anthropic-sdk-php/zipball/64bd99228b878cd247c4da0909c2e50c6fd84097",
+                "reference": "64bd99228b878cd247c4da0909c2e50c6fd84097",
+                "shasum": ""
+            },
+            "require": {
+                "guzzlehttp/guzzle": "^7.8",
+                "illuminate/support": "^9.52|^10.0|^11.0",
+                "php": "^8.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "WpAi\\Anthropic\\Providers\\AnthropicServiceProvider"
+                    ],
+                    "aliases": {
+                        "Anthropic": "WpAi\\Anthropic\\Facades\\Anthropic"
+                    }
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "WpAi\\Anthropic\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Greg Hunt",
+                    "email": "greg@codewp.ai"
+                }
+            ],
+            "description": "This library provides convenient access to the Anthropic REST API from server-side PHP",
+            "support": {
+                "issues": "https://github.com/wpai-inc/anthropic-sdk-php/issues",
+                "source": "https://github.com/wpai-inc/anthropic-sdk-php/tree/0.2.1"
+            },
+            "time": "2024-08-08T23:12:24+00:00"
         }
     ],
     "packages-dev": [

@@ -18,6 +18,7 @@ class ProviderModel
         return match ($this->model) {
             Model::GPT4O_MINI => match ($this->provider) {
                 default => new ModelMeta(
+                    name: 'GPT-4 Mini',
                     context_window: 128000,
                     input_cost: 0.15,
                     output_cost: 0.60,
@@ -56,6 +57,38 @@ class ProviderModel
                     context_window: 8192,
                     input_cost: 0.00,
                     output_cost: 0.00,
+                ),
+            },
+            Model::CLAUDE3_OPUS => match ($this->provider) {
+                default => new ModelMeta(
+                    context_window: 200000,
+                    input_cost: 15.00,
+                    output_cost: 75.00,
+                    max_output: 4096,
+                ),
+            },
+            Model::CLAUDE3_SONNET => match ($this->provider) {
+                default => new ModelMeta(
+                    context_window: 200000,
+                    input_cost: 3.00,
+                    output_cost: 15.00,
+                    max_output: 4096,
+                ),
+            },
+            Model::CLAUDE35_SONNET => match ($this->provider) {
+                default => new ModelMeta(
+                    context_window: 200000,
+                    input_cost: 3.00,
+                    output_cost: 15.00,
+                    max_output: 4096,
+                ),
+            },
+            Model::CLAUDE3_HAIKU => match ($this->provider) {
+                default => new ModelMeta(
+                    context_window: 200000,
+                    input_cost: 0.25,
+                    output_cost: 1.25,
+                    max_output: 4096,
                 ),
             },
         };

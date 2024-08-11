@@ -2,11 +2,14 @@
 
 namespace WpAi\EleLLM\Providers\OpenAi;
 
+use Generator;
 use OpenAI;
 use OpenAI\Client;
-use OpenAI\Responses\StreamResponse;
+use WpAi\EleLLM\Enums\Role;
 use WpAi\EleLLM\Interfaces\ClientInterface;
 use WpAi\EleLLM\Requests\ChatRequest;
+use WpAi\EleLLM\Responses\ChatChoice;
+use WpAi\EleLLM\Responses\ChatMessage;
 use WpAi\EleLLM\Responses\ChatResponse;
 
 class OpenAiClient implements ClientInterface
@@ -22,8 +25,21 @@ class OpenAiClient implements ClientInterface
     {
         $result = $this->client->chat()->create($request->toArray());
 
+        $choices = array_map(function ($c) {
+            $role = Role::from($c->message->role);
+
+            return new ChatChoice(
+                index: $c->index,
+                message: new ChatMessage(
+                    role: $role->value,
+                    content: $c->message->content,
+                ),
+                finishReason: $c->finishReason,
+            );
+        }, $result->choices);
+
         $response = (new ChatResponse(
-            choices: $result->choices,
+            choices: $choices,
             id: $result->id,
             object: $result->object,
             timestamp: $result->created,
@@ -38,8 +54,11 @@ class OpenAiClient implements ClientInterface
         return $response;
     }
 
-    public function stream(ChatRequest $request): StreamResponse
+    public function stream(ChatRequest $request): Generator
     {
-        return $this->client->completions()->createStreamed($request->toArray());
+        $stream = $this->client->chat()->createStreamed($request->toArray());
+        foreach ($stream as $response) {
+            yield $response;
+        }
     }
 }
