@@ -18,15 +18,22 @@
     "minimum-stability": "stable",
     "require-dev": {
         "pestphp/pest": "^2.35",
-        "laravel/pint": "^1.17"
+        "laravel/pint": "^1.17",
+        "vlucas/phpdotenv": "^5.6"
     },
     "config": {
         "allow-plugins": {
-            "pestphp/pest-plugin": true
+            "pestphp/pest-plugin": true,
+            "php-http/discovery": true
         }
     },
     "require": {
         "jenssegers/blade": "^2.0",
-        "illuminate/view": "11.7.0"
+        "illuminate/view": "11.7.0",
+        "symfony/var-dumper": "^7.1",
+        "openai-php/client": "^0.10.1",
+        "symfony/http-client": "^7.1",
+        "nyholm/psr7": "^1.8",
+        "guzzlehttp/guzzle": "^7.9"
     }
 }

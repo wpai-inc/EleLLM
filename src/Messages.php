@@ -2,35 +2,35 @@
 
 namespace WpAi\EleLLM;
 
-use Illuminate\Support\Collection;
+use ArrayIterator;
+use Countable;
+use IteratorAggregate;
 use JsonSerializable;
+use WpAi\EleLLM\Adapters\SimpleMessagesAdapter;
 use WpAi\EleLLM\Enums\Role;
+use WpAi\EleLLM\Interfaces\IMessagesAdapter;
 
-class Messages implements JsonSerializable
+class Messages implements Countable, IteratorAggregate, JsonSerializable
 {
-    private $messages = [];
+    private array $messages = [];
+
+    private IMessagesAdapter $adapter;
 
     private int $limit = 10;
 
-    /**
-     * Adds the system messages as the first message in the messages
-     */
-    public function addSystem(string $system): self
+    public function __construct(?IMessagesAdapter $adapter = null)
     {
-        $systemMsg = new Message(Role::SYSTEM, $system);
+        $this->adapter = $adapter ?? new SimpleMessagesAdapter;
+    }
 
-        $this->messages = collect($this->messages)
-            ->filter(fn ($msg) => $msg->role !== Role::SYSTEM)
-            ->toArray();
-
-        $this->messages = [
-            $systemMsg, ...$this->messages,
-        ];
+    public function setAdapter(IMessagesAdapter $adapter): self
+    {
+        $this->adapter = $adapter;
 
         return $this;
     }
 
-    public function limit(int $limit)
+    public function limit(int $limit): self
     {
         $this->limit = $limit;
 
@@ -39,29 +39,33 @@ class Messages implements JsonSerializable
 
     public function addMessage(Message $msg): self
     {
-        $this->messages[] = $msg;
+        if ($msg->isSystem()) {
+            $nonSystemMessages = array_filter($this->messages, fn ($msg) => ! $msg->isSystem());
+            $this->messages = [$msg, ...$nonSystemMessages];
+        } else {
+            $this->messages[] = $msg;
+        }
 
         return $this;
     }
 
-    public function addUserMessage(string $msg): self
+    public function addSystemMessage(string $msg)
     {
-        $this->addMessage(new Message(Role::USER, $msg));
+        $this->addMessage(new Message(Role::SYSTEM, $msg));
 
         return $this;
     }
 
-    public function addAssistantMessage(string $msg): self
+    public function addUserMessage(string $msg, ?string $vision = null)
+    {
+        $this->addMessage(new Message(Role::USER, $msg, $vision));
+
+        return $this;
+    }
+
+    public function addAssistantMessage(string $msg)
     {
         $this->addMessage(new Message(Role::ASSISTANT, $msg));
-
-        return $this;
-    }
-
-    public function addMessageContent(string|Role $role, $content): self
-    {
-        $role = is_string($role) ? Role::from($role) : $role;
-        $this->addMessage(new Message($role, $content));
 
         return $this;
     }
@@ -71,9 +75,9 @@ class Messages implements JsonSerializable
         return empty($this->messages);
     }
 
-    public function replaceLastMessage(string $message, ?string $vision = null): self
+    public function replaceLastMessage(Message $msg): self
     {
-        $this->messages[count($this->messages) - 1] = new Message(Role::USER, $message, $vision);
+        $this->messages[count($this->messages) - 1] = $msg;
 
         return $this;
     }
@@ -81,39 +85,29 @@ class Messages implements JsonSerializable
     public function get(): array
     {
         $system = $this->getSystem();
+        $limit = $system ? $this->limit - 1 : $this->limit;
+        $messages = array_slice($this->filterRoles(Role::USER, Role::ASSISTANT), -$limit);
 
-        $messages = collect($this->messages)
-            ->filter(fn ($msg) => $msg->role !== Role::SYSTEM)
-            ->take(is_null($system) ? $this->limit : $this->limit - 1);
+        $prefilteredMessages = [$system, ...$messages];
 
-        if ($system) {
-            $messages->push($system);
-        }
-
-        return $messages->reverse()
-            ->values()
-            ->toArray();
+        return array_map(fn (Message $msg) => $this->adapter->clientMessage($msg), $prefilteredMessages);
     }
 
     public function jsonSerialize(): array
     {
-        return collect($this->messages)
-            ->map(fn ($item) => [$item->role->value => $item->message])
-            ->toArray();
+        return $this->get();
     }
 
     public function each(callable $callback): void
     {
-        foreach ($this->messages as $key => $message) {
-            $this->messages[$key] = $callback($message);
-        }
+        $this->messages = array_map($callback, $this->messages);
     }
 
-    public function getLatestMessageFrom(Role $role): string
+    public function getLatestMessageFrom(Role $role): ?string
     {
-        return collect($this->messages)
-            ->filter(fn ($msg) => $msg->role === $role)
-            ->last()->message;
+        $messages = $this->filterRoles($role);
+
+        return $messages ? end($messages)->message : null;
     }
 
     public function getLatestUserMessage(): string
@@ -121,25 +115,23 @@ class Messages implements JsonSerializable
         return $this->getLatestMessageFrom(Role::USER);
     }
 
-    public function addUserRequests(Collection $userRequests): self
-    {
-        foreach ($userRequests as $ur) {
-            $this->addMessageContent(Role::USER, $ur->message);
-
-            foreach ($ur->agentActions as $aa) {
-                if ($aa->convoSummary && $aa->isSuccessful) {
-                    $this->addMessageContent(Role::ASSISTANT, $aa->convoSummary);
-                }
-            }
-        }
-
-        return $this;
-    }
-
     public function getSystem(): ?Message
     {
-        return collect($this->messages)
-            ->filter(fn ($msg) => $msg->role === Role::SYSTEM)
-            ->first();
+        return $this->messages[0]->isSystem() ? $this->messages[0] : null;
+    }
+
+    public function count(): int
+    {
+        return count($this->messages);
+    }
+
+    public function getIterator(): ArrayIterator
+    {
+        return new ArrayIterator($this->messages);
+    }
+
+    private function filterRoles(Role ...$roles): array
+    {
+        return array_filter($this->messages, fn ($msg) => in_array($msg->role, $roles));
     }
 }

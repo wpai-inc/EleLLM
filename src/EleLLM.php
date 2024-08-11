@@ -20,4 +20,9 @@ class EleLLM
 
         $this->prompt = new Prompt($this->promptFileDir, $this->promptCacheDir);
     }
+
+    public function request(): LlmRequest
+    {
+        return new LlmRequest($this->prompt);
+    }
 }
