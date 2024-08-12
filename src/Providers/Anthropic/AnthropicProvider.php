@@ -34,9 +34,8 @@ class AnthropicProvider implements ProviderInterface
     {
         $stream = $this->client->stream($this->getChatRequest($messages, $options));
 
-        $content = '';
-        foreach ($stream as $content) {
-            yield $content;
+        foreach ($stream as $chatResponse) {
+            yield (string) $chatResponse;
         }
     }
 

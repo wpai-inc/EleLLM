@@ -9,6 +9,7 @@ use WpAi\EleLLM\Enums\Role;
 use WpAi\EleLLM\Interfaces\ClientInterface;
 use WpAi\EleLLM\Requests\ChatRequest;
 use WpAi\EleLLM\Responses\ChatChoice;
+use WpAi\EleLLM\Responses\ChatChoices;
 use WpAi\EleLLM\Responses\ChatMessage;
 use WpAi\EleLLM\Responses\ChatResponse;
 
@@ -28,16 +29,16 @@ class AnthropicClient implements ClientInterface
     {
         $result = $this->makeRequest($request)->create($request->toArray());
 
-        $choices = [];
+        $choices = new ChatChoices;
         foreach ($result->content as $k => $c) {
-            $choices[] = new ChatChoice(
+            $choices->addChoice(new ChatChoice(
                 index: $k,
                 message: new ChatMessage(
                     role: Role::ASSISTANT->value,
                     content: $c['text']
                 ),
                 finishReason: $result?->stopReason,
-            );
+            ));
         }
 
         $response = (new ChatResponse(
@@ -58,22 +59,47 @@ class AnthropicClient implements ClientInterface
     {
         $stream = $this->makeRequest($request)->stream($request->toArray());
 
-        $content = '';
-        foreach ($stream->getIterator() as $response) {
-            $type = $response['type'];
-
-            switch ($type) {
+        $choices = new ChatChoices;
+        foreach ($stream as $response) {
+            $id = null;
+            $model = null;
+            $usage = [];
+            $finishReason = null;
+            $role = null;
+            switch ($response['type']) {
                 case 'message_start':
-                    // $this->inputTokens = $response['message']['usage']['input_tokens'];
+                    $id = $response['message']['id'];
+                    $model = $response['message']['model'];
+                    $role = Role::from($response['message']['role'])->value;
+                    $usage = array_merge($usage, $response['message']['usage']);
                     break;
                 case 'content_block_delta':
-                    $content .= $response['delta']['text'];
-                    yield $content;
+                    $choices->append(new ChatChoice(
+                        index: $response['index'],
+                        message: new ChatMessage(
+                            role: $role,
+                            content: $response['delta']['text'],
+                        ),
+                        finishReason: $finishReason,
+                    ));
                     break;
                 case 'message_delta':
-                    // $this->outputTokens = $response['usage']['output_tokens'];
+                    $finishReason = $response['delta']['stop_reason'];
+                    $usage = array_merge($usage, $response['usage']);
                     break;
             }
+
+            $chatResponse = new ChatResponse(
+                choices: $choices,
+                id: $id,
+                model: $model,
+            );
+
+            if (isset($usage['input_tokens']) && isset($usage['output_tokens'])) {
+                $chatResponse->setUsage($usage['input_tokens'], $usage['output_tokens'], $usage['input_tokens'] + $usage['output_tokens']);
+            }
+
+            yield $chatResponse;
         }
     }
 

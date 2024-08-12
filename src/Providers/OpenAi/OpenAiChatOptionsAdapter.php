@@ -9,6 +9,8 @@ class OpenAiChatOptionsAdapter implements IChatOptionsAdapter
 {
     public function transform(ChatOptions $option): array
     {
-        return $option->toArray();
+        return [
+            ...$option->toArray(),
+        ];
     }
 }

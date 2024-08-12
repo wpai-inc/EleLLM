@@ -9,6 +9,7 @@ use WpAi\EleLLM\Enums\Role;
 use WpAi\EleLLM\Interfaces\ClientInterface;
 use WpAi\EleLLM\Requests\ChatRequest;
 use WpAi\EleLLM\Responses\ChatChoice;
+use WpAi\EleLLM\Responses\ChatChoices;
 use WpAi\EleLLM\Responses\ChatMessage;
 use WpAi\EleLLM\Responses\ChatResponse;
 
@@ -39,7 +40,7 @@ class OpenAiClient implements ClientInterface
         }, $result->choices);
 
         $response = (new ChatResponse(
-            choices: $choices,
+            choices: ChatChoices::create($choices),
             id: $result->id,
             object: $result->object,
             timestamp: $result->created,
@@ -54,16 +55,31 @@ class OpenAiClient implements ClientInterface
         return $response;
     }
 
+    /**
+     * @todo: implement usage
+     * not currently showing in API response
+     */
     public function stream(ChatRequest $request): Generator
     {
         $stream = $this->client->chat()->createStreamed($request->toArray());
-        // $usage = null;
-        // $content .= data_get($response, 'choices.0.delta.content');
-        // $usage = data_get($response, 'usage');
 
+        $choices = new ChatChoices;
         foreach ($stream as $response) {
+            if ($response->choices) {
+                foreach ($response->choices as $c) {
+                    $choices->append(new ChatChoice(
+                        index: $c->index,
+                        message: new ChatMessage(
+                            role: $c->delta->role,
+                            content: $c->delta->content,
+                        ),
+                        finishReason: $c->finishReason,
+                    ));
+                }
+            }
+
             yield new ChatResponse(
-                choices: $response->choices,
+                choices: $choices,
                 id: $response->id,
                 object: $response->object,
                 timestamp: $response->created,

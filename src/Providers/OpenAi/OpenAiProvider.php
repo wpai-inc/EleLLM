@@ -43,6 +43,7 @@ class OpenAiProvider implements ProviderInterface
 
     public function stream(Messages $messages, array $options): Generator
     {
+        $options['stream_options'] = ['include_usage' => true];
         $stream = $this->client->stream($this->getChatRequest($messages, $options));
 
         foreach ($stream as $response) {

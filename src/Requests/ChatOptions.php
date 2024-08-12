@@ -11,6 +11,7 @@ class ChatOptions
     public function __construct(
         public readonly string $model,
         public readonly ?string $system = null,
+        public readonly ?array $stream_options = null,
     ) {
         $this->adapter = $this->baseAdapter();
     }

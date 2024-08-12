@@ -6,7 +6,7 @@ class ChatChoice
 {
     public function __construct(
         public readonly int $index,
-        public readonly ChatMessage $message,
+        public ChatMessage $message,
         public readonly ?string $finishReason = null,
     ) {}
 

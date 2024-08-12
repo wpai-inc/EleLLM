@@ -4,19 +4,15 @@ namespace WpAi\EleLLM\Responses;
 
 class ChatResponse
 {
-    public readonly ChatChoices $choices;
-
     public function __construct(
-        array $choices,
+        public readonly ChatChoices $choices,
         public ?Usage $usage = null,
         public readonly ?string $id = null,
         public readonly ?string $object = null,
         public readonly ?int $timestamp = null,
         public readonly ?string $model = null,
         public readonly ?string $systemFingerprint = null,
-    ) {
-        $this->choices = ChatChoices::create($choices);
-    }
+    ) {}
 
     public function __toString(): string
     {
