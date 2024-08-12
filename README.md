@@ -1,3 +1,5 @@
+![EleLLM Mascott Image](https://github.com/wpai-inc/EleLLM/blob/main/elellm.png?raw=true)
+
 # EleLLM
 
 A PHP framework that makes working with LLMs more pleasurable and accessible.
